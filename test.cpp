@@ -51,7 +51,7 @@ int main() {
     string run=setup();
     cout<<run;
 
-    FILE* pipe = popen(".venv/bin/python ../preprocess.py", "w");
+    FILE* pipe = popen(".venv/bin/python ../logparser.py", "w");
     if (!pipe) {
         std::cerr << "Failed to open pipe to Python script.\n";
         return 1;
