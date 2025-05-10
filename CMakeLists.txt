@@ -1,5 +1,9 @@
 cmake_minimum_required(VERSION 3.5)
 
-project("hello_cmake")
+project("vanguard")
+include_directories(includes)
 
-add_executable("hello_cmake" logsingester.cpp)
+add_executable("vanguard" 
+main.cpp
+src/monitor.cpp
+)

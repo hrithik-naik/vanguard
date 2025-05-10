@@ -1,5 +1,5 @@
 import sys
-from preprocessing.convertver1 import preprocess_linux_logs
+from convertver1 import preprocess_linux_logs
 import pandas as pd
 
 
