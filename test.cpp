@@ -20,7 +20,11 @@ std::string runCommand(const std::string& cmd) {
 }
 
 std::string getDmesgLogs() {
-    return runCommand("tail  /var/log/kern.log ");
+    return runCommand("journalctl -k -n 10");
+}
+string setup(){
+   string c=runCommand("bash ../setup.sh");
+   return c;
 }
 
 std::string getCPUUsage() {
@@ -44,7 +48,10 @@ std::string getMemoryUsage() {
 
 int main() {
     std::cout << "Starting Linux Kernel Monitor...\n";
-    FILE* pipe = popen("python3 ../preprocess.py", "w");
+    string run=setup();
+    cout<<run;
+
+    FILE* pipe = popen(".venv/bin/python ../preprocess.py", "w");
     if (!pipe) {
         std::cerr << "Failed to open pipe to Python script.\n";
         return 1;

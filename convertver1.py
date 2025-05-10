@@ -3,9 +3,7 @@ import numpy as np
 import re
 import os
 from datetime import datetime
-import matplotlib.pyplot as plt
-import seaborn as sns
-from sklearn.preprocessing import StandardScaler
+
 
 def preprocess_linux_logs(log_path, start_year=2024):
     """
@@ -238,79 +236,3 @@ def preprocess_linux_logs(log_path, start_year=2024):
     }
 
 # Example usage
-if __name__ == "__main__":
-
-    log = [
-    "Jun  9 06:06:20 combo syslogd 1.4.1: restart.",
-    "Jun  9 06:06:20 combo syslog: syslogd startup succeeded",
-    "Jun  9 06:06:20 combo syslog: klogd startup succeeded",
-    "Jun  9 06:06:20 combo kernel: klogd 1.4.1, log source = /proc/kmsg started.",
-    "Jun  9 06:06:20 combo kernel: Linux version 2.6.5-1.358 (bhcompile@bugs.build.redhat.com) (gcc version 3.3.3 20040412 (Red Hat Linux 3.3.3-7)) #1 Sat May 8 09:04:50 EDT 2004",
-    "Jun  9 06:06:20 combo kernel: BIOS-provided physical RAM map:",
-    "Jun  9 06:06:20 combo kernel:  BIOS-e820: 0000000000000000 - 00000000000a0000 (usable)",
-    "Jun  9 06:06:20 combo kernel:  BIOS-e820: 00000000000f0000 - 0000000000100000 (reserved)",
-    "Jun  9 06:06:20 combo kernel:  BIOS-e820: 0000000000100000 - 0000000007eae000 (usable)",
-    "Jun  9 06:06:20 combo kernel:  BIOS-e820: 0000000007eae000 - 0000000008000000 (reserved)",
-    "Jun  9 06:06:20 combo kernel:  BIOS-e820: 00000000ffb00000 - 0000000100000000 (reserved)",
-    "Jun  9 06:06:20 combo kernel: 0MB HIGHMEM available.",
-    "Jun  9 06:06:20 combo kernel: 126MB LOWMEM available.",
-    "Jun  9 06:06:20 combo kernel: zapping low mappings.",
-    "Jun  9 06:06:20 combo kernel: On node 0 totalpages: 32430",
-    "Jun  9 06:06:20 combo kernel:   DMA zone: 4096 pages, LIFO batch:1",
-    "Jun  9 06:06:20 combo kernel:   Normal zone: 28334 pages, LIFO batch:6",
-    "Jun  9 06:06:20 combo kernel:   HighMem zone: 0 pages, LIFO batch:1",
-    "Jun  9 06:06:20 combo kernel: DMI 2.3 present.",
-    "Jun  9 06:06:20 combo kernel: ACPI disabled because your bios is from 2000 and too old",
-    "Jun  9 06:06:20 combo kernel: You can enable it with acpi=force",
-    "Jun  9 06:06:20 combo kernel: Built 1 zonelists",
-    "Jun  9 06:06:20 combo irqbalance: irqbalance startup succeeded",
-    "Jun  9 06:06:20 combo kernel: Kernel command line: ro root=LABEL=/ rhgb quiet",
-    "Jun  9 06:06:20 combo kernel: mapped 4G/4G trampoline to ffff3000.",
-    "Jun  9 06:06:20 combo kernel: Initializing CPU#0",
-    "Jun  9 06:06:20 combo portmap: portmap startup succeeded",
-    "Jun  9 06:06:20 combo kernel: CPU 0 irqstacks, hard=02345000 soft=02344000",
-    "Jun  9 06:06:20 combo kernel: PID hash table entries: 512 (order 9: 4096 bytes)",
-    "Jun  9 06:06:20 combo kernel: Detected 731.214 MHz processor.",
-    "Jun  9 06:06:20 combo kernel: Using tsc for high-res timesource",
-    "Jun  9 06:06:20 combo kernel: Console: colour VGA+ 80x25",
-    "Jun  9 06:06:20 combo kernel: Memory: 125312k/129720k available (1540k kernel code, 3860k reserved, 599k data, 144k init, 0k highmem)",
-    "Jun  9 06:06:20 combo kernel: Calibrating delay loop... 1441.79 BogoMIPS",
-    "Jun  9 06:06:20 combo kernel: Security Scaffold v1.0.0 initialized",
-    "Jun  9 06:06:20 combo kernel: SELinux:  Initializing.",
-    "Jun  9 06:06:20 combo kernel: SELinux:  Starting in permissive mode",
-    "Jun  9 06:06:20 combo kernel: There is already a security framework initialized, register_security failed.",
-    "Jun  9 06:06:20 combo kernel: Failure registering capabilities with the kernel",
-    "Jun  9 06:06:20 combo kernel: selinux_register_security:  Registering secondary module capability",
-    "Jun  9 06:06:20 combo kernel: Capability LSM initialized",
-    "Jun  9 06:06:20 combo kernel: Dentry cache hash table entries: 16384 (order: 4, 65536 bytes)",
-    "Jun  9 06:06:20 combo kernel: Inode-cache hash table entries: 8192 (order: 3, 32768 bytes)",
-    "Jun  9 06:06:20 combo kernel: Mount-cache hash table entries: 512 (order: 0, 4096 bytes)",
-    "Jun  9 06:06:20 combo rpc.statd[1605]: Version 1.0.6 Starting",
-    "Jun  9 06:06:20 combo nfslock: rpc.statd startup succeeded",
-    "Jun  9 06:06:20 combo kernel: CPU: L1 I cache: 16K, L1 D cache: 16K",
-    "Jun  9 06:06:21 combo kernel: CPU: L2 cache: 256K",
-    "Jun  9 06:06:21 combo kernel: Intel machine check architecture supported.",
-    "Jun  9 06:06:21 combo kernel: Intel machine check reporting enabled on CPU#0.",
-    "Jun  9 06:06:21 combo kernel: CPU: Intel Pentium III (Coppermine) stepping 06",
-    "Jun  9 06:06:21 combo kernel: Enabling fast FPU save and restore... done.",
-    "Jun  9 06:06:21 combo kernel: Enabling unmasked SIMD FPU exception support... done.",
-    "Jun  9 06:06:21 combo kernel: Checking 'hlt' instruction... OK.",
-    "Jun  9 06:06:21 combo kernel: POSIX conformance testing by UNIFIX",
-    "Jun  9 06:06:21 combo kernel: NET: Registered protocol family 16",
-    "Jun  9 06:06:21 combo kernel: PCI: PCI BIOS revision 2.10 entry at 0xfc0ce, last bus=1",
-    "Jun  9 06:06:21 combo kernel: PCI: Using configuration type 1",
-    "Jun  9 06:06:21 combo kernel: mtrr: v2.0 (20020519)",
-    "Jun  9 06:06:21 combo kernel: ACPI: Subsystem revision 20040326",
-    "Jun  9 06:06:21 combo kernel: ACPI: Interpreter disabled.",
-    "Jun  9 06:06:21 combo kernel: Linux Plug and Play Support v0.97 (c) Adam Belay",
-    "Jun  9 06:06:21 combo kernel: usbcore: registered new driver usbfs",
-    "Jun  9 06:06:21 combo kernel: usbcore: registered new driver hub",
-    "Jun  9 06:06:21 combo rpcidmapd: rpc.idmapd startup succeeded"
-]
-
-    
- 
-processed_data = preprocess_linux_logs(
-        log_path=log,
-        start_year=2024 
-    )
