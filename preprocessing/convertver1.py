@@ -122,8 +122,8 @@ def preprocess_linux_logs(log_path, start_year=2024):
     
     # Step 4: Filter to keep only kernel and driver related logs
     kernel_logs = df[df['is_kernel_related']].copy()
-    print(f"Found {len(kernel_logs)} kernel and driver related logs out of {len(df)} total logs")
-    print(f"Of which {kernel_logs['is_failure'].sum()} are identified as failures")
+    # print(f"Found {len(kernel_logs)} kernel and driver related logs out of {len(df)} total logs")
+    # print(f"Of which {kernel_logs['is_failure'].sum()} are identified as failures")
     
     # Step 5: Extract additional features from the logs
     def extract_features(df):
