@@ -9,7 +9,7 @@ for line in sys.stdin:
     line = line.strip()
     if line:
         log_list.append(line)
-        if len(log_list) == 10:
+        if len(log_list) %10==0:
             start_time = time.perf_counter()
 
             result = preprocess_linux_logs(log_path=log_list, start_year=2024)
