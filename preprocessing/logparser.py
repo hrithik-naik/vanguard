@@ -2,7 +2,7 @@ import sys
 import time
 from convertver1 import preprocess_linux_logs
 import pandas as pd
-from inferencesvm import svm
+from inference import svm
 #echo "Simulating a log change at $(date)" | sudo tee -a /var/log/
 log_list = []
 
