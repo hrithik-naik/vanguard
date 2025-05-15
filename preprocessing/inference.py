@@ -6,15 +6,19 @@ from sklearn.preprocessing import LabelEncoder
 svm_model = None
 scaler = None
 encoder = None
+rf_model=None
 
 def initialize():
-    global svm_model, scaler, encoder
+    global svm_model, scaler, encoder,rf_model
     if svm_model is None:
         svm_model = joblib.load(os.path.join(os.getcwd(), '../model/svm/svm_model.joblib'))
     if scaler is None:
         scaler = joblib.load(os.path.join(os.getcwd(), '../model/svm/scaler.joblib'))
     if encoder is None:
-        encoder = LabelEncoder() 
+        encoder = LabelEncoder()
+    if rf_model is None:
+        rf_model=joblib.load(os.path.join(os.getcwd(), '../model/randomforest/randomforestmodel.joblib'))
+    
 
 def svm(df):
     initialize()
@@ -28,6 +32,7 @@ def svm(df):
     
     scaled = scaler.transform(df)
     preds = svm_model.predict(scaled)
+    # print(rf_model.__class__)
 
   
     failure_ratio = preds.mean()
