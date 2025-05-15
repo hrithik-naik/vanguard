@@ -17,7 +17,7 @@ def initialize():
     if encoder is None:
         encoder = LabelEncoder()
     if rf_model is None:
-        rf_model=joblib.load(os.path.join(os.getcwd(), '../model/randomforest/randomforestmodel.joblib'))
+        rf_model=joblib.load(os.path.join(os.getcwd(), '../model/randomforest/random_forestscikit1.6.0.joblib'))
     
 
 def svm(df):
@@ -32,7 +32,7 @@ def svm(df):
     
     scaled = scaler.transform(df)
     preds = svm_model.predict(scaled)
-    # print(rf_model.__class__)
+    print(rf_model.__class__)
 
   
     failure_ratio = preds.mean()
