@@ -1,4 +1,5 @@
 import joblib
+import threading
 import os
 from sklearn.preprocessing import LabelEncoder
 
@@ -39,7 +40,7 @@ def svm(df):
     if failure_ratio > 0.2:
         print(f"⚠️  Warning: High predicted failure rate ({failure_ratio:.2f})")
 
-    return preds
+    print(preds)
 def test():
     print("hello")
     print("test")
