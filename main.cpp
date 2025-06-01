@@ -3,44 +3,56 @@
 #include <thread>
 #include <chrono>
 #include <cstdio>
+#include <atomic>
 
-int main() {
-    std::cout << "Starting Linux Kernel Monitor...\n";
-
-    std::string run = setup();
-    std::cout << run;
-
+std::atomic<bool> keep_running(true);
+void monitor_kernel_logs() {
     FILE* pipe = popen(".venv/bin/python ../preprocessing/logparser.py", "w");
-   
     if (!pipe) {
         std::cerr << "Failed to open pipe to Python script.\n";
-        return 1;
+        return;
     }
 
     std::string lastLogs;
-    auto lastLogChange = std::chrono::steady_clock::now();
-    int duration;
 
-    while (true) {
-        std::string currentLogs = getKernalLogs();
-        
+    while (keep_running) {
+        std::string currentLogs = getKernalLogs();  
 
         if (currentLogs != lastLogs) {
-            duration = 0;
-            lastLogChange = std::chrono::steady_clock::now();
-
             fwrite(currentLogs.c_str(), 1, currentLogs.size(), pipe);
             fflush(pipe);
             lastLogs = currentLogs;
         }
 
-        auto now = std::chrono::steady_clock::now();
-        duration = std::chrono::duration_cast<std::chrono::seconds>(now - lastLogChange).count();
-        std::cout << "Seconds since last log change: " << duration << std::endl;
-
-        std::this_thread::sleep_for(std::chrono::seconds(1));
+        std::this_thread::sleep_for(std::chrono::milliseconds(100)); 
     }
 
     pclose(pipe);
+}
+
+
+void monitor_syscalls() {
+    while (keep_running) {
+        return ;
+    }
+}
+
+int main() {
+    std::cout << "Starting Linux Kernel Monitor...\n";
+    std::string run = setup();
+    std::cout << run;
+
+    std::thread log_thread(monitor_kernel_logs);
+    //std::thread syscall_thread(monitor_syscalls);
+
+    std::cout << "Press ENTER to stop...\n";
+    std::cin.get();
+
+    keep_running = false;
+
+    log_thread.join();
+    //syscall_thread.join();
+
+    std::cout << "Monitoring stopped.\n";
     return 0;
 }
