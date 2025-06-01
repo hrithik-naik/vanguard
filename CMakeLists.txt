@@ -6,4 +6,5 @@ include_directories(includes)
 add_executable("vanguard" 
 main.cpp
 src/monitor.cpp
+src/syscall_mapper.cpp
 )
