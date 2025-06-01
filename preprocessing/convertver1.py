@@ -225,6 +225,12 @@ def preprocess_linux_logs(log_path, start_year=2024):
             kernel_logs_for_csv['timestamp'] = kernel_logs_for_csv['timestamp'].astype(str)
         
         return kernel_logs
+    return pd.DataFrame(columns=[
+    'timestamp', 'hostname', 'service', 'message',
+    'is_kernel_related', 'is_failure', 'matched_patterns',
+    'severity', 'message_length', 'word_count', 'fault_type',
+    'has_hex_address', 'has_memory_value', 'has_process_id'
+])
         
     
     
