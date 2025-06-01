@@ -23,24 +23,37 @@ def initialize():
 
 def svm(df):
     initialize()
+    df_original = df.copy()
 
- 
     for col in ('hostname', 'service', 'fault_type'):
         df[col] = encoder.fit_transform(df[col])
 
+    
     df.drop(columns=['timestamp', 'message', 'matched_patterns', 'is_kernel_related', 'is_failure'], inplace=True)
 
+
     
+
+ 
     scaled = scaler.transform(df)
     preds = svm_model.predict(scaled)
-    print(rf_model.__class__)
 
-  
+   
+    failure_rows = df_original[preds == 1]
+
+    if not failure_rows.empty:
+        print(f"⚠️  Predicted failure on the following rows:\n{failure_rows}")
+    else:
+        print("✅ No failures predicted.")
+
+    print("Random Forest Model Loaded:", rf_model.__class__)
     failure_ratio = preds.mean()
     if failure_ratio > 0.2:
         print(f"⚠️  Warning: High predicted failure rate ({failure_ratio:.2f})")
 
-    print(preds)
+    print("Predictions:", preds)
+
+
 def test():
     print("hello")
     print("test")
