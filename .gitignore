@@ -3,3 +3,4 @@
 /.venv
 /__pycache__
 /preprocessing/__pycache__
+/simulator/a.out

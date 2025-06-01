@@ -43,26 +43,26 @@ void generate_kernel_failure_logs() {
     
     // Realistic kernel failure messages that indicate system crashes/failures
     const char* failure_messages[] = {
+        "Out of Memory: Killed process 22608 (httpd).",
+        "Out of Memory: Killed process 22747 (httpd).",
+        "Out of Memory: Killed process 22759 (httpd).",
+        "Out of Memory: Killed process 22613 (httpd).",
+        "Out of Memory: Killed process 22766 (httpd).",
         "Out of memory: Kill process simulation - memory exhausted",
-        "BUG: kernel NULL pointer dereference, address: 0000000000000008",
-        "general protection fault: 0000 [#1] SMP PTI",
-        "Call Trace: memory_failure+0x89/0x4f0",
-        "Machine check events logged",
-        "Memory failure: 0x1234abcd: recovery action for dirty LRU page: Failed",
-        "Kernel panic - not syncing: Fatal exception in interrupt",
-        "segfault at 0 ip 0000000000000000 sp 00007fff12345678 error 14",
-        "RIP: 0010:__kmalloc+0x89/0x280",
-        "Memory error: DIMM location unknown",
-        "Uncorrected memory error in unrecoverable memory",
-        "mce: [Hardware Error]: Machine check events logged",
-        "ECC memory error detected and corrected",
-        "Memory controller: Uncorrectable memory error",
-        "EDAC MC0: UE page 0x12345, offset 0x678, grain 512, syndrome 0xabcd",
-        "WARNING: kernel stack corruption on CPU#0",
-        "Oops: 0002 [#1] SMP",
-        "Process killed due to memory corruption detected",
-        "Bad page state: flags:0x200000000000008 count:0 mapcount:-128 mapping:0000000000000000 index:0x0",
-        "Memory failure: 0x5678def0: Sending SIGBUS to pid:1234, due to hwpoison page"
+        "authentication failure; logname= uid=0 euid=0 tty=NODEVssh ruser= rhost=218.188.2.4  user=test",
+        "authentication failure; logname= uid=0 euid=0 tty=NODEVssh ruser= rhost=218.188.2.4  user=test",
+        "authentication failure; logname= uid=0 euid=0 tty=NODEVssh ruser= rhost=218.188.2.4  user=test",
+        "authentication failure; logname= uid=0 euid=0 tty=NODEVssh ruser= rhost=218.188.2.4  user=test",
+        "authentication failure; logname= uid=0 euid=0 tty=NODEVssh ruser= rhost=218.188.2.4  user=test",
+        "authentication failure; logname= uid=0 euid=0 tty=NODEVssh ruser= rhost=218.188.2.4  user=test",
+        "authentication failure; logname= uid=0 euid=0 tty=NODEVssh ruser= rhost=218.188.2.4  user=test",
+        "authentication failure; logname= uid=0 euid=0 tty=NODEVssh ruser= rhost=218.188.2.4  user=test",
+        "authentication failure; logname= uid=0 euid=0 tty=NODEVssh ruser= rhost=218.188.2.4  user=test",
+        "authentication failure; logname= uid=0 euid=0 tty=NODEVssh ruser= rhost=218.188.2.4  user=test",
+        "authentication failure; logname= uid=0 euid=0 tty=NODEVssh ruser= rhost=218.188.2.4  user=test",
+        "authentication failure; logname= uid=0 euid=0 tty=NODEVssh ruser= rhost=218.188.2.4  user=test",
+        "authentication failure; logname= uid=0 euid=0 tty=NODEVssh ruser= rhost=218.188.2.4  user=test",
+        "authentication failure; logname= uid=0 euid=0 tty=NODEVssh ruser= rhost=211.46.241.200  user=guest"
     };
     
     int num_messages = sizeof(failure_messages) / sizeof(failure_messages[0]);
