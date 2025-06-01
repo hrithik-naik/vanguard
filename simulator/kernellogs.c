@@ -62,7 +62,37 @@ void generate_kernel_failure_logs() {
         "authentication failure; logname= uid=0 euid=0 tty=NODEVssh ruser= rhost=218.188.2.4  user=test",
         "authentication failure; logname= uid=0 euid=0 tty=NODEVssh ruser= rhost=218.188.2.4  user=test",
         "authentication failure; logname= uid=0 euid=0 tty=NODEVssh ruser= rhost=218.188.2.4  user=test",
-        "authentication failure; logname= uid=0 euid=0 tty=NODEVssh ruser= rhost=211.46.241.200  user=guest"
+        "authentication failure; logname= uid=0 euid=0 tty=NODEVssh ruser= rhost=211.46.241.200  user=guest",
+        "[<02114408>] do_page_fault+0x0/0x446",
+        "VM: killing process httpd",
+        "Out of Memory: Killed process 1805 (python).",
+        "Out of Memory: Killed process 1303 (sendmail).",
+        "[<02114408>] do_page_fault+0x0/0x446",
+        "Out of Memory: Killed process 5601 (httpd).",
+        "[<02114408>] do_page_fault+0x0/0x446",
+        "Out of Memory: Killed process 5652 (httpd).",
+        "Out of Memory: Killed process 5870 (python)",
+        "Out of Memory: Killed process 5872 (httpd).",
+        "Out of Memory: Killed process 5881 (python).",
+        "[<02114408>] do_page_fault+0x0/0x446",
+        "VM: killing process sendmail",
+        "authentication failure; logname= uid=0 euid=0 tty=NODEVssh ruser= rhost=202.164.165.108  user=test",
+        "authentication failure; logname= uid=0 euid=0 tty=NODEVssh ruser= rhost=202.164.165.108  user=test",
+        "Out of Memory: Killed process 14913 (python).",
+        "Out of Memory: Killed process 14921 (python).",
+        "Out of Memory: Killed process 14644 (sendmail).",
+        "Out of Memory: Killed process 14923 (httpd).",
+        "Out of Memory: Killed process 20263 (mrtg).",
+        "Out of Memory: Killed process 32136 (httpd).",
+        "Out of Memory: Killed process 7348 (httpd).",
+        "[<02114408>] do_page_fault+0x0/0x446",
+        "Out of Memory: Killed process 12338 (mysqld).",
+        "Out of Memory: Killed process 12358 (mysqld).",
+        "Out of Memory: Killed process 2328 (httpd).",
+        "Out of Memory: Killed process 12390 (mysqld).",
+        
+    
+    
     };
     
     int num_messages = sizeof(failure_messages) / sizeof(failure_messages[0]);

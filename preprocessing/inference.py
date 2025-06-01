@@ -55,5 +55,4 @@ def svm(df):
 
 
 def test():
-    print("hello")
-    print("test")
+    print("Hello World")
