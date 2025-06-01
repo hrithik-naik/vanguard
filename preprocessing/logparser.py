@@ -24,5 +24,4 @@ for line in sys.stdin:
 
             log_list.clear()
 
-            
         
