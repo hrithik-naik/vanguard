@@ -4,7 +4,7 @@ import threading
 import pandas as pd
 from convertver1 import preprocess_linux_logs
 from inference import svm, predict_batch
-from preprocessortest1 import process_realtime_logs
+from preprocessortedbeta import process_realtime_logs
 from concurrent.futures import ThreadPoolExecutor
 
 log_list = []
