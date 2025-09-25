@@ -119,7 +119,7 @@ void generate_kernel_failure_logs()
         }
 
         log_count++;
-        usleep(5000);
+        usleep(100000);
 
         // Add critical system failure indicators
         if (log_count % 5 == 0)

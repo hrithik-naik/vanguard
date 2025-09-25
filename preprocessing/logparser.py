@@ -6,6 +6,8 @@ from convertver1 import preprocess_linux_logs
 from inference import svm, predict_batch
 from preprocessortedbeta import process_realtime_logs
 from concurrent.futures import ThreadPoolExecutor
+import tensorflow as tf
+from inferencelstm import run_inference
 
 log_list = []
 executor = ThreadPoolExecutor(max_workers=4)  # Tune based on your CPU
@@ -13,20 +15,27 @@ executor = ThreadPoolExecutor(max_workers=4)  # Tune based on your CPU
 def process_logs(logs):
     start_time = time.perf_counter()
 
-    processed=process_realtime_logs(logs)
-    end_time = time.perf_counter()
+    processed = process_realtime_logs(logs)
+
     print(processed)
-    elapsed_ms = (end_time - start_time) * 1000
-    print(f"Processing time: {elapsed_ms:.2f} ms")
+    print(type(processed))
+    elapsed_ms = (time.perf_counter() - start_time) * 1000
+    print(f"Total time (preprocess + inference): {elapsed_ms:.2f} ms")
+
     if processed is None or processed.empty:
         return
 
-    # df1 = processed.copy()
-    # df2 = processed.copy()
+    # Submit inference job and wait for result
+    future_lstm = executor.submit(
+        run_inference,
+        processed["normalized_message"].astype(str).tolist()
+    )
+    #result = future_lstm.result()   # blocks until inference done
 
-    # # Submit both jobs to thread pool
-    # future_svm = executor.submit(svm, df1)
-    # future_pred = executor.submit(predict_batch, df2)
+    
+
+  
+
 
     
 
