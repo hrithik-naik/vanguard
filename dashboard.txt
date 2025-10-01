@@ -1,0 +1,109 @@
+{
+  "id": null,
+  "title": "Processed Logs Dashboard",
+  "timezone": "browser",
+  "refresh": "15s",
+  "schemaVersion": 38,
+  "version": 1,
+  "panels": [
+    {
+      "type": "bargauge",
+      "title": "Is Fault (True=1, False=0)",
+      "gridPos": { "x": 0, "y": 0, "w": 12, "h": 8 },
+      "targets": [
+        {
+          "expr": "sum by (is_fault) (count_over_time({job=\"processed_logs\", is_fault!=\"\"}[7d]))",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "bargauge",
+      "title": "Cluster ID Distribution",
+      "gridPos": { "x": 12, "y": 0, "w": 12, "h": 8 },
+      "targets": [
+        {
+          "expr": "sum by (cluster_id) (count_over_time({job=\"processed_logs\", cluster_id!=\"\"}[7d]))",
+          "refId": "B"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "Total Logs",
+      "gridPos": { "x": 0, "y": 8, "w": 6, "h": 4 },
+      "targets": [
+        {
+          "expr": "sum(count_over_time({job=\"processed_logs\"}[7d]))",
+          "refId": "C"
+        }
+      ]
+    },
+    {
+      "type": "bargauge",
+      "title": "Fault Type Split",
+      "gridPos": { "x": 6, "y": 8, "w": 18, "h": 8 },
+      "targets": [
+        {
+          "expr": "sum by (fault_type) (count_over_time({job=\"processed_logs\", fault_type!=\"\"}[7d]))",
+          "refId": "D"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Logs per Minute",
+      "gridPos": { "x": 0, "y": 12, "w": 12, "h": 6 },
+      "targets": [
+        {
+          "expr": "count_over_time({job=\"processed_logs\"}[1m])",
+          "refId": "E"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Faults per Minute (is_fault=True)",
+      "gridPos": { "x": 12, "y": 12, "w": 12, "h": 6 },
+      "targets": [
+        {
+          "expr": "count_over_time({job=\"processed_logs\", is_fault=\"True\"}[1m])",
+          "refId": "F"
+        }
+      ]
+    },
+    {
+      "type": "piechart",
+      "title": "Fault Type Breakdown",
+      "gridPos": { "x": 0, "y": 18, "w": 12, "h": 8 },
+      "targets": [
+        {
+          "expr": "sum by (fault_type) (count_over_time({job=\"processed_logs\", fault_type!=\"\"}[7d]))",
+          "refId": "G"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Cluster Heatmap (logs per cluster)",
+      "gridPos": { "x": 12, "y": 18, "w": 12, "h": 8 },
+      "targets": [
+        {
+          "expr": "sum by (cluster_id) (count_over_time({job=\"processed_logs\"}[5m]))",
+          "refId": "H"
+        }
+      ]
+    },
+    {
+      "type": "logs",
+      "title": "Raw Logs",
+      "gridPos": { "x": 0, "y": 26, "w": 24, "h": 10 },
+      "targets": [
+        {
+          "expr": "{job=\"processed_logs\"}",
+          "refId": "I"
+        }
+      ]
+    }
+  ]
+}

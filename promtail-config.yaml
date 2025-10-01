@@ -1,0 +1,49 @@
+server:
+  http_listen_port: 9080
+  grpc_listen_port: 0
+
+positions:
+  filename: /tmp/positions.yaml
+
+clients:
+  - url: http://loki:3100/loki/api/v1/push
+
+scrape_configs:
+  - job_name: processed_logs
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: processed_logs
+          __path__: /processed_logs.tsv
+
+    pipeline_stages:
+      # Drop header row
+      - drop:
+          expression: "^timestamp\t"
+
+      # Parse TSV: timestamp, is_fault, fault_type, cluster_id
+      - regex:
+          expression: '^(?P<ts>\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2})\t(?P<is_fault>True|False)\t(?P<fault_type>[^\t]+)\t(?P<cluster_id>\d+)$'
+
+      # Use ingestion time (commented out timestamp stage to avoid old data rejection)
+      # If you want to re-enable later, make sure timestamps are recent
+      # - timestamp:
+      #     source: ts
+      #     format: '2006-01-02 15:04:05'
+      #     location: Asia/Kolkata
+
+      # Attach labels for Loki queries
+      - labels:
+          is_fault:
+          fault_type:
+          cluster_id:
+
+      # Clean log line template
+      - template:
+          source: line
+          template: "is_fault={{.is_fault}} fault_type={{.fault_type}} cluster_id={{.cluster_id}}"
+
+      # Final log output
+      - output:
+          source: line

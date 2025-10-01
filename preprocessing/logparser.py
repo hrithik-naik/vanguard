@@ -1,9 +1,10 @@
 import sys
+import os
 import time
 import threading
 import pandas as pd
-from convertver1 import preprocess_linux_logs
-from inference import svm, predict_batch
+#from convertver1 import preprocess_linux_logs
+#from inference import svm, predict_batch
 from preprocessortedbeta import process_realtime_logs
 from concurrent.futures import ThreadPoolExecutor
 import tensorflow as tf
@@ -21,6 +22,14 @@ def process_logs(logs):
     print(type(processed))
     elapsed_ms = (time.perf_counter() - start_time) * 1000
     print(f"Total time (preprocess + inference): {elapsed_ms:.2f} ms")
+
+
+    FILE = "processed_logs.tsv"
+    write_header = not os.path.exists(FILE)
+
+    with open(FILE, "a", encoding="utf-8") as f:
+        processed[["timestamp","is_fault","fault_type","cluster_id"]].to_csv(f, index=False, sep="\t", header=write_header)
+
 
     if processed is None or processed.empty:
         return

@@ -9,8 +9,12 @@ pwd
 source .venv/bin/activate
 cd .. 
 echo "Installing dependencies..."
+pwd
+cp docker-compose.yml loki-config.yaml promtail-config.yaml build/
 #sudo apt-get update && sudo apt-get install -y llvm-17 clang-17
 pip install -r requirments.txt
+cd build 
+sudo docker compose up -d
 python -c "import tensorflow as tf; print('importing'); import tensorflow as tf"
 
 echo "Setup complete."

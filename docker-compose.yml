@@ -1,0 +1,47 @@
+version: "3.8"
+
+services:
+  loki:
+    image: grafana/loki:2.9.4
+    command: -config.file=/etc/loki/local-config.yaml
+    ports:
+      - "3100:3100"
+    volumes:
+      - ./loki-config.yaml:/etc/loki/local-config.yaml:ro
+      - loki-data:/loki
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3100/ready"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+      start_period: 10s
+
+  promtail:
+    image: grafana/promtail:2.9.4
+    command: -config.file=/etc/promtail/config.yaml
+    depends_on:
+      loki:
+        condition: service_healthy
+    volumes:
+      - ./promtail-config.yaml:/etc/promtail/config.yaml:ro
+      - ./processed_logs.tsv:/processed_logs.tsv:ro
+
+  grafana:
+    image: grafana/grafana:11.2.0
+    ports:
+      - "3000:3000"
+    depends_on:
+      loki:
+        condition: service_healthy
+    volumes:
+      - grafana-data:/var/lib/grafana
+    environment:
+      # Optional: set admin creds on first run; change these!
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      # (Optional) disable analytics
+      - GF_ANALYTICS_REPORTING_ENABLED=false
+
+volumes:
+  loki-data:
+  grafana-data:

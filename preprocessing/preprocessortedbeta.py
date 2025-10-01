@@ -122,7 +122,7 @@ def classify_fault_type(message, is_fault):
     else:
         return 'general_fault'
 
-def parse_log_entry(log_line, current_year=2024):
+def parse_log_entry(log_line, current_year=2025):
     """Parse single log entry"""
     log_line = log_line.strip()
     if not log_line:
@@ -215,7 +215,7 @@ def hash_based_clustering(normalized_messages):
     
     return [cluster_mapping.get(i, 0) for i in range(len(normalized_messages))]
 
-def process_realtime_logs(realtime_logs, current_year=2024):
+def process_realtime_logs(realtime_logs, current_year=2025):
     """
     Process batch of real-time logs and return results as DataFrame
     Input: List of log strings
@@ -248,6 +248,15 @@ def process_realtime_logs(realtime_logs, current_year=2024):
         is_fault = fault_prob > 0.5
         fault_type = classify_fault_type(parsed_log['message'], is_fault)
         normalized_msg = normalize_message(parsed_log['message'])
+        # Mark audit logs so they are not treated as kernel
+# After fault probability check
+        service_lc = (parsed_log['service'] or '').lower()
+        message_lc = (parsed_log['message'] or '').lstrip().lower()
+        if service_lc.startswith('audit') or message_lc.startswith('audit:'):
+            is_fault = False
+            fault_type="normal"# force audit logs to be treated as non-fault
+ # per your requirement (keep the spelling as requested)
+
         
         result = {
             'timestamp': parsed_log['timestamp'].strftime('%Y-%m-%d %H:%M:%S') if parsed_log['timestamp'] else 'Unknown',
