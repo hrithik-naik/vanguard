@@ -40,7 +40,7 @@ def load_pipeline_notebook(manifest_path: str = MANIFEST_PATH) -> dict:
         raise FileNotFoundError(f"Model file not found at {model_path}")
 
     use_hashing = bool(manifest.get("use_hashing", False))
-    context_m = int(manifest.get("context_m", 10))
+    context_m = int(10)
     k_next = int(manifest.get("k_next", 10))
 
     print(f"Loading Keras model from: {model_path} ...")
@@ -71,10 +71,10 @@ def predict_next_k_notebook(pipeline: dict, current_logs: List[str]) -> Dict:
     context_m = pipeline["context_m"]
     k_next = pipeline["k_next"]
     tf_in = _prepare_input_from_context_notebook(current_logs, context_m)
-    t0 = time.time()
+    #t0 = time.time()
     pred = model(tf_in, training=False).numpy().ravel()[0]
-    latency = time.time() - t0
-    return {"predicted_count": float(pred), "k_next": int(k_next), "context_m": int(context_m), "latency_s": latency}
+    #latency = time.time() - t0
+    return {"predicted_count": float(pred), "k_next": int(k_next), "context_m": int(context_m)}
 
 # ---------- Make pipeline global (load once) ----------
 pipeline = load_pipeline_notebook(MANIFEST_PATH)
