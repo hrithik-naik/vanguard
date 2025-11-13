@@ -99,7 +99,7 @@ def run_inference(current_context: List[str]) -> Dict:
 
     result = predict_next_k_notebook(pipeline, current_context)
     print("Prediction:", result)
-    #return result
+    return result
 
 # ---------- Example usage ----------
 if __name__ == "__main__":

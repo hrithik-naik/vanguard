@@ -1,6 +1,32 @@
-/.vscode
-/build
-/.venv
-/__pycache__
-/preprocessing/__pycache__
-/simulator/a.out
+# VS Code
+.vscode/
+
+# Virtual environment
+.venv/
+
+# Build output
+build/
+
+# Python cache folders (recursive)
+__pycache__/
+**/__pycache__/
+
+# Compiled Python files
+*.pyc
+*.pyo
+*.pyd
+
+# Simulator binaries
+simulator/a.out
+simulator/*.out
+
+# Logs, temp files
+*.log
+*.tmp
+
+# Incident persistence file (if you want to ignore)
+tmp/
+*.json
+
+# OS junk
+.DS_Store

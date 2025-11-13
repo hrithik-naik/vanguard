@@ -13,7 +13,10 @@ pwd
 cp docker-compose.yml loki-config.yaml promtail-config.yaml build/
 #sudo apt-get update && sudo apt-get install -y llvm-17 clang-17
 pip install -r requirments.txt
-cd build 
+pip install flask
+
+cd build
+# cat processed_logs.tsv
 sudo docker compose up -d
 python -c "import tensorflow as tf; print('importing'); import tensorflow as tf"
 
