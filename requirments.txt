@@ -5,3 +5,4 @@ tensorflow-cpu
 flask
 langgraph
 google-generativeai
+python-dotenv

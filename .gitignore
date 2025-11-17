@@ -26,7 +26,7 @@ simulator/*.out
 
 # Incident persistence file (if you want to ignore)
 tmp/
-*.json
-
+.env
+data/*.json
 # OS junk
 .DS_Store

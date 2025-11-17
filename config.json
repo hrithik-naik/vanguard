@@ -1,0 +1,27 @@
+{
+  "llm": {
+    "provider": "gemini",
+    "model": "gemini-2.0-flash",
+    "api_key": "AIzaSyCVPDdq37qIzGr3c1DP3s35bWvGwYyAK9s",
+    "temperature": 0.0,
+    "api_base": "http://localhost:11434"
+  },
+  "incident_board": {
+    "path": "/tmp/incidents.json",
+    "poll_interval": 5,
+    "max_per_cycle": 3
+  },
+  "ai": {
+    "max_attempts": 3,
+    "verification_batches": 3
+  },
+  "execution": {
+    "mode": "production"
+  },
+  "escalation": {
+    "email": "admin@example.com"
+  },
+  "logging": {
+    "path": "/tmp/ai_actions.log"
+  }
+}
