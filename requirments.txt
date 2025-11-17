@@ -3,3 +3,5 @@ numpy
 scikit-learn==1.6.0
 tensorflow-cpu
 flask
+langgraph
+google-generativeai

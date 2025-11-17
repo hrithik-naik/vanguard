@@ -2,7 +2,7 @@ import os
 import socket
 import asyncio
 import json
-from incidentmanager import process_event_batch,show_board
+from incidentmanager import process_event_batch,show_board,get_incidents_for_ai
 import time
 
 SOCKET_PATH = "/home/ubu/vanguard.sock"
@@ -21,6 +21,7 @@ async def handle_event(data):
         process_event_batch(event)
         elapsed_ms = (time.perf_counter() - start_time) * 1000
         print(f"Total time (Incident Board): {elapsed_ms:.2f} ms")
+        # print(get_incidents_for_ai())
         
         faults = set(event.get("fault_type", []))
         # print(f"[Healer] Received event with faults={event}\n")

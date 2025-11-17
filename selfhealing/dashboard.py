@@ -4,7 +4,7 @@ import os
 from datetime import datetime
 
 app = Flask(__name__)
-PATH = "/tmp/incidents.json"
+PATH = "data/incidents.json"
 
 HTML_TEMPLATE = """
 <!DOCTYPE html>
