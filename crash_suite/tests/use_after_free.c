@@ -1,10 +1,13 @@
-#include <stdlib.h>
+#include <linux/bpf.h>
+#include <sys/syscall.h>
+#include <unistd.h>
 #include <stdio.h>
 
 int main() {
-    printf("[use_after_free] Triggering use-after-free...\n");
-    int *p = malloc(sizeof(int));
-    free(p);
-    *p = 42;
+    struct bpf_insn prog[] = {{0}}; // invalid
+
+    printf("[bpf] Loading malformed BPF program...\n");
+    syscall(__NR_bpf, 0 /* BPF_PROG_LOAD */, prog, sizeof(prog));
+
     return 0;
 }

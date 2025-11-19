@@ -1,3 +1,8 @@
+#!/bin/bash
+set -e
+
 source build/.venv/bin/activate
 
-python3 selfhealing/dashboard.py
+# run dashboard and store its PID
+python3 selfhealing/dashboard.py &
+echo $! > /tmp/vanguard_dashboard.pid

@@ -1,14 +1,28 @@
 #!/bin/bash
 
-echo "Starting crash suite..."
+# Resolve the directory where this script is located
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+BIN_DIR="$SCRIPT_DIR/bin"
 
-for exe in bin/*; do
+echo "=== Crash Suite Execution ==="
+
+for exe in "$BIN_DIR"/*; do
     echo "--------------------------------------"
     echo "Running: $exe"
+
     "$exe" &
-    sleep 1
-    wait || true
-    sleep 5
+    PID=$!
+
+    sleep 3
+
+    if ps -p $PID > /dev/null; then
+        echo "Process still running → killing PID $PID"
+        kill -9 $PID
+    else
+        echo "Process exited or crashed."
+    fi
+
+    sleep 2
 done
 
-echo "Crash suite finished."
+echo "=== Crash Suite Finished ==="

@@ -1,6 +1,8 @@
 #!/bin/bash
-
-set -e  # Exit on error
+set -e
 
 source build/.venv/bin/activate
-python3 selfhealing/ai_service.py
+
+# run AI service and store its PID
+python3 selfhealing/ai_service.py &
+echo $! > /tmp/vanguard_heal.pid
