@@ -75,6 +75,7 @@ class AIIncidentService:
         workflow.add_node("security_specialist", self.security_specialist)
         workflow.add_node("action_planner", self.action_planner)
         workflow.add_node("executor", self.executor)
+        workflow.add_node("feedback_analyzer", self.feedback_analyzer)
         workflow.add_node("verifier", self.verifier)
         
         workflow.set_entry_point("coordinator")
@@ -95,7 +96,17 @@ class AIIncidentService:
             workflow.add_edge(specialist, "action_planner")
         
         workflow.add_edge("action_planner", "executor")
-        workflow.add_edge("executor", "verifier")
+        workflow.add_edge("executor", "feedback_analyzer")
+        
+        workflow.add_conditional_edges(
+            "feedback_analyzer",
+            self.decide_after_feedback,
+            {
+                "success": "verifier",
+                "retry": "coordinator",
+                "failed": END
+            }
+        )
         
         workflow.add_conditional_edges(
             "verifier",
@@ -113,6 +124,10 @@ class AIIncidentService:
         incident = state["incident"]
         self._rate_limit_api_call()
         
+        previous_feedback = ""
+        if state.get("execution_result"):
+            previous_feedback = f"\n\nPrevious Attempt Result:\n{state['execution_result'][:300]}"
+        
         prompt = f"""You are a Linux SRE coordinator analyzing an incident.
 
 Incident Details:
@@ -120,12 +135,12 @@ Incident Details:
 - Message: {incident['message']}
 - Count: {incident['count']}
 - Intermittent: {incident.get('is_intermittent', False)}
-- Previous Attempts: {incident.get('ai_attempts', 0)}
+- AI Attempts: {state['attempts']}/{self.MAX_ATTEMPTS}{previous_feedback}
 
 Provide brief analysis (2-3 sentences):
 1. What is happening
 2. Severity
-3. Resolution approach"""
+3. Resolution approach{' (considering previous failure)' if previous_feedback else ''}"""
 
         try:
             response = self.llm.generate(prompt)
@@ -292,42 +307,140 @@ VERIFY: <one verification command>"""
     def executor(self, state: IncidentState) -> IncidentState:
         if state.get("error"):
             return state
-            
-        execute_cmd = state["action_plan"].get("execute_command", "")
-        
+
+        execute_cmd = state["action_plan"].get("execute_command", "").strip()
+
         if not execute_cmd:
             state["execution_result"] = "ERROR: No command"
             state["error"] = "No command generated"
             return state
-        
+
+        SAFE_PREFIXES = [
+            "systemctl restart", "systemctl status", "journalctl", "ulimit",
+            "kill", "gdb", "valgrind", "echo", "dmesg", "chmod", "chown", "sysctl",
+            "ps aux", "top", "free", "df", "du", "ls", "cat", "grep"
+        ]
+
+        BLOCK_PATTERNS = [
+            "rm -rf", "shutdown", "reboot", "mkfs", "mount", "umount", ":(){:|:&};:",
+            "wget http", "curl http", "sudo su", "passwd", "useradd", "deluser",
+            "chmod 777 /", "chown -R /", "iptables", "apt remove", "apt purge",
+            "dd if=", "mkfs", "truncate /", "mv /", "sed -i '/'", "pkill -9 systemd",
+        ]
+
+        def is_safe(cmd: str) -> bool:
+            if any(bad in cmd for bad in BLOCK_PATTERNS):
+                return False
+            return any(cmd.startswith(prefix) for prefix in SAFE_PREFIXES)
+
+        if not is_safe(execute_cmd):
+            state["execution_result"] = f"BLOCKED: Unsafe command"
+            state["error"] = "Command rejected by safety policy"
+            self.log_action(state["incident_id"], "blocked_dangerous", {"command": execute_cmd})
+            print(f"🚫 [BLOCKED] {execute_cmd}")
+            return state
+
         self.log_action(state["incident_id"], "executing", {"command": execute_cmd})
-        
-        if not incidentmanager.mark_ai_attempting(state["incident_id"]):
-            print(f"⚠️  Could not mark incident as attempting")
-        
+        incidentmanager.mark_ai_attempting(state["incident_id"])
+
         if self.config['execution']['mode'] == "simulation":
-            state["execution_result"] = f"SIMULATED: {execute_cmd}"
-            print(f"🔧 SIMULATED: {execute_cmd}")
-        else:
-            import subprocess
-            try:
-                result = subprocess.run(
-                    execute_cmd,
-                    shell=True,
-                    capture_output=True,
-                    timeout=30,
-                    text=True
-                )
-                state["execution_result"] = result.stdout if result.returncode == 0 else result.stderr
-                print(f"🔧 EXECUTED: {execute_cmd}")
-            except subprocess.TimeoutExpired:
-                state["execution_result"] = "ERROR: Command timeout"
-                state["error"] = "Command execution timeout"
-            except Exception as e:
-                state["execution_result"] = f"ERROR: {str(e)}"
-                state["error"] = str(e)
+            state["execution_result"] = f"SIMULATION_OK: {execute_cmd}"
+            print(f"🎮 [SIMULATION] {execute_cmd}")
+            return state
+
+        import subprocess
+        
+        try:
+            result = subprocess.run(
+                execute_cmd,
+                shell=True,
+                capture_output=True,
+                timeout=20,
+                text=True
+            )
+
+            output = result.stdout if result.returncode == 0 else result.stderr
+            state["execution_result"] = f"EXIT_CODE: {result.returncode}\nOUTPUT: {output[:500]}"
+
+            if result.returncode == 0:
+                print(f"✅ [EXECUTED] {execute_cmd}")
+                print(f"   Output: {output[:100]}")
+            else:
+                print(f"❌ [FAILED] {execute_cmd}")
+                print(f"   Error: {output[:100]}")
+
+        except subprocess.TimeoutExpired:
+            state["execution_result"] = "ERROR: Command timed out after 20s"
+            state["error"] = "timeout"
+            print("⏱️  [TIMEOUT]")
+
+        except Exception as e:
+            state["execution_result"] = f"ERROR: {str(e)}"
+            state["error"] = str(e)
+            print(f"💥 [EXCEPTION] {str(e)}")
+
+        return state
+    
+    def feedback_analyzer(self, state: IncidentState) -> IncidentState:
+        if state.get("error"):
+            return state
+        
+        execution_result = state.get("execution_result", "")
+        command = state["action_plan"].get("execute_command", "")
+        
+        self._rate_limit_api_call()
+        
+        prompt = f"""You executed this command to fix an incident:
+Command: {command}
+
+Result:
+{execution_result}
+
+Analyze if the fix was successful. Reply with ONLY one word:
+- SUCCESS
+- RETRY
+- FAILED
+
+Response:"""
+
+        try:
+            response = self.llm.generate(prompt).strip().upper()
+            
+            if "SUCCESS" in response:
+                state["verification_passed"] = True
+                print(f"✅ AI Analysis: Command succeeded!")
+            elif "RETRY" in response:
+                state["verification_passed"] = False
+                print(f"🔄 AI Analysis: Command failed, will retry")
+            else:
+                state["verification_passed"] = False
+                state["error"] = "AI determined fix failed"
+                print(f"❌ AI Analysis: Cannot be fixed")
+            
+            self.log_action(state["incident_id"], "feedback_analysis", {
+                "decision": response,
+                "command": command,
+                "output": execution_result[:200]
+            })
+            
+        except Exception as e:
+            print(f"⚠️  Feedback analysis failed: {e}")
+            state["verification_passed"] = True
         
         return state
+    
+    def decide_after_feedback(self, state: IncidentState) -> str:
+        if state.get("error"):
+            return "failed"
+        
+        if state["verification_passed"]:
+            return "success"
+        
+        if state["attempts"] < self.MAX_ATTEMPTS - 1:
+            print(f"🔄 Retrying with different approach (attempt {state['attempts'] + 1}/{self.MAX_ATTEMPTS})")
+            return "retry"
+        
+        return "failed"
     
     def verifier(self, state: IncidentState) -> IncidentState:
         if state.get("error"):
@@ -340,8 +453,6 @@ VERIFY: <one verification command>"""
             print(f"⚠️  Could not mark action as completed")
             state["error"] = "Failed to update incident status"
             return state
-        
-        state["verification_passed"] = True
         
         self.log_action(state["incident_id"], "verification_started", {
             "status": "waiting for incident board"
@@ -358,14 +469,7 @@ VERIFY: <one verification command>"""
                 self.escalate_incident(state["incident"])
             return "failed"
         
-        if state["verification_passed"]:
-            return "success"
-        
-        if state["attempts"] >= self.MAX_ATTEMPTS:
-            self.escalate_incident(state["incident"])
-            return "failed"
-        
-        return "retry"
+        return "success"
     
     def escalate_incident(self, incident: dict):
         email = self.config['escalation']['email']
@@ -427,7 +531,6 @@ VERIFY: <one verification command>"""
             })
         else:
             print(f"⏳ Waiting... {incident['id'][:8]} - Streak: {verification_streak}/3")
-            print(f"   Will check again in next cycle")
 
         return
     
@@ -499,7 +602,7 @@ VERIFY: <one verification command>"""
             }
     
     def run(self):
-        print(f"🚀 AI Incident Service Started")
+        print(f"🚀 AI Incident Service Started (WITH FEEDBACK LOOP)")
         print(f"Provider: {self.config['llm']['provider']}")
         print(f"Model: {self.config['llm']['model']}")
         print(f"Monitoring: {self.INCIDENTS_PATH}")

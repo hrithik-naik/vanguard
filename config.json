@@ -16,7 +16,7 @@
     "verification_batches": 3
   },
   "execution": {
-    "mode": "simulation"
+    "mode": "production"
   },
   "escalation": {
     "email": "admin@example.com"

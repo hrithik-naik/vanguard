@@ -9,17 +9,18 @@ show_help() {
     echo "Usage: vanguard <command>"
     echo
     echo "Commands:"
-    echo "  start       Build and start detection system (foreground)"
-    echo "  runall      Start the full stack (dashboard, incident board, healing, then detection foreground)"
-    echo "  incident    Run incident board"
-    echo "  dashboard   Run incident dashboard UI"
-    echo "  heal        Run AI self-healing engine"
-    echo "  simulate    Run crash simulation suite"
-    echo "  watch       Monitor Vanguard resource usage"
-    echo "  status      Show running Vanguard processes"
-    echo "  reset       Clear incidents.json"
-    echo "  stop        Stop all Vanguard components"
-    echo "  help        Show this help menu"
+    echo "  start         Build + start detection"
+    echo "  runall        Start full stack"
+    echo "  incident      Run incident board"
+    echo "  dashboard     Run main dashboard UI"
+    echo "  aidashboard   Run AI healing dashboard (port 5001)"
+    echo "  heal          Run AI healing engine"
+    echo "  simulate      Run crash suite"
+    echo "  watch         Monitor Vanguard usage"
+    echo "  status        List running processes"
+    echo "  reset         Clear incidents"
+    echo "  stop          Stop all components"
+    echo "  help          Show help"
     echo
 }
 
@@ -37,6 +38,7 @@ case "$1" in
         bash "$ROOT_DIR/incident.sh" &
         bash "$ROOT_DIR/dashboard.sh" &
         bash "$ROOT_DIR/selfhealing.sh" &
+        bash "$ROOT_DIR/ai_dashboard.sh" &
 
         cd "$ROOT_DIR/build"
         cmake --build . || { echo "Build failed"; exit 1; }
@@ -50,6 +52,13 @@ case "$1" in
 
     dashboard)
         bash "$ROOT_DIR/dashboard.sh" &
+        ;;
+
+    aidashboard)  # NEW COMMAND
+        echo "Starting AI Action Dashboard (port 5001)..."
+        bash "$ROOT_DIR/ai_dashboard.sh" &
+        echo $! > /tmp/vanguard_ai_dashboard.pid
+        echo "PID saved to /tmp/vanguard_ai_dashboard.pid"
         ;;
 
     heal)
@@ -68,46 +77,48 @@ case "$1" in
     reset)
         bash "$ROOT_DIR/reset_incidents.sh"
         ;;
-
+    
     status)
-        ps aux | grep -E "$ROOT_DIR|vanguard|selfhealing|dashboard|incident|crash_test|logparser" | grep -v grep
+        echo "Running Vanguard processes:"
+        ps aux | grep -E "$ROOT_DIR|vanguard|ai_dashboard|selfhealing|incident|crash_test|logparser" | grep -v grep
         ;;
 
- stop)
-    echo "Stopping Vanguard..."
+    stop)
+        echo "Stopping Vanguard..."
 
-    # Detection binary
-    sudo pkill -f "build/vanguard" 2>/dev/null && echo "Stopped vanguard detector."
-    
+        sudo pkill -f "build/vanguard" 2>/dev/null && echo "Stopped detector."
 
-    # Dashboard
-    if [[ -f /tmp/vanguard_dashboard.pid ]]; then
-        kill -9 "$(cat /tmp/vanguard_dashboard.pid)" 2>/dev/null && rm /tmp/vanguard_dashboard.pid
-        echo "Stopped dashboard."
-    fi
+        if [[ -f /tmp/vanguard_dashboard.pid ]]; then
+            kill -9 "$(cat /tmp/vanguard_dashboard.pid)" 2>/dev/null && rm /tmp/vanguard_dashboard.pid
+            echo "Stopped main dashboard."
+        fi
 
-    # Healing AI
-    if [[ -f /tmp/vanguard_heal.pid ]]; then
-        kill -9 "$(cat /tmp/vanguard_heal.pid)" 2>/dev/null && rm /tmp/vanguard_heal.pid
-        echo "Stopped healing system."
-    fi
+        if [[ -f /tmp/vanguard_ai_dashboard.pid ]]; then
+            kill -9 "$(cat /tmp/vanguard_ai_dashboard.pid)" 2>/dev/null && rm /tmp/vanguard_ai_dashboard.pid
+            echo "Stopped AI dashboard."
+        fi
 
-    # Incident manager
-    if [[ -f /tmp/vanguard_incident.pid ]]; then
-        kill -9 "$(cat /tmp/vanguard_incident.pid)" 2>/dev/null && rm /tmp/vanguard_incident.pid
-        echo "Stopped incident board."
-    fi
+        if [[ -f /tmp/vanguard_heal.pid ]]; then
+            kill -9 "$(cat /tmp/vanguard_heal.pid)" 2>/dev/null && rm /tmp/vanguard_heal.pid
+            echo "Stopped healing engine."
+        fi
 
-    # Just in case Python zombies survived
-    pgrep -fa "python3.*selfhealing" | awk '{print $1}' | xargs -r kill -9
-    pgrep -fa "python3.*dashboard" | awk '{print $1}' | xargs -r kill -9
-    pgrep -fa "python3.*incident" | awk '{print $1}' | xargs -r kill -9
-    cd "$ROOT_DIR/build"
-    sudo docker compose down
+        if [[ -f /tmp/vanguard_incident.pid ]]; then
+            kill -9 "$(cat /tmp/vanguard_incident.pid)" 2>/dev/null && rm /tmp/vanguard_incident.pid
+            echo "Stopped incident board."
+        fi
 
-    echo "All Vanguard components stopped."
-    ;;
+        pgrep -fa "python3.*ai_dashboard" | awk '{print $1}' | xargs -r kill -9
+        pgrep -fa "python3.*selfhealing" | awk '{print $1}' | xargs -r kill -9
+        pgrep -fa "python3.*dashboard" | awk '{print $1}' | xargs -r kill -9
+        pgrep -fa "python3.*incident" | awk '{print $1}' | xargs -r kill -9
 
+        echo "Stopping Docker (if running)..."
+        cd "$ROOT_DIR/build"
+        sudo docker compose down
+
+        echo "All Vanguard components stopped."
+        ;;
 
     help|--help|-h)
         show_help
@@ -117,5 +128,4 @@ case "$1" in
         show_help
         exit 1
         ;;
-
 esac
